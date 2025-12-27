@@ -23,8 +23,6 @@
   --color-dark-300: #242633;
 
   --font-mona-sans: "Mona Sans", sans-serif;
-
-  --bg-pattern: url("/pattern.png");
 }
 
 :root {
@@ -139,7 +137,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-slate-950 text-foreground;
   }
   p {
     @apply text-light-100;
@@ -186,11 +184,11 @@
   }
 
   .card-border {
-    @apply border-gradient p-0.5 rounded-2xl w-fit;
+    @apply border-2 border-slate-700 rounded-2xl w-fit;
   }
 
   .card {
-    @apply dark-gradient rounded-2xl min-h-full;
+    @apply bg-slate-900/30 rounded-4xl min-h-full;
   }
 
   .form {
@@ -201,7 +199,7 @@
     }
 
     .input {
-      @apply !bg-dark-200 !rounded-full !min-h-12 !px-5 placeholder:!text-light-100;
+      @apply !bg-slate-800 !rounded-full !min-h-12 !px-5 placeholder:!text-light-100;
     }
 
     .btn {
@@ -217,11 +215,11 @@
     }
 
     .card-interviewer {
-      @apply flex-center flex-col gap-2 p-7 h-[350px] blue-gradient-dark rounded-lg border-2 border-primary-200/50 flex-1 sm:basis-1/2 w-full;
+      @apply flex-center flex-col gap-2 p-7 h-[350px] blue-gradient-dark rounded-4xl border-2 border-primary-200/50 flex-1 sm:basis-1/2 w-full;
     }
 
     .avatar {
-      @apply z-10 flex items-center justify-center blue-gradient rounded-full size-[120px] relative;
+      @apply z-10 flex items-center justify-center bg-slate-700 rounded-full size-[120px] relative;
 
       .animate-speak {
         @apply absolute inline-flex size-5/6 animate-ping rounded-full bg-primary-200 opacity-75;
@@ -229,11 +227,11 @@
     }
 
     .card-border {
-      @apply border-gradient p-0.5 rounded-2xl flex-1 sm:basis-1/2 w-full h-[350px] max-md:hidden;
+      @apply border-gradient p-0.5 rounded-4xl overflow-hidden flex-1 sm:basis-1/2 w-full h-[350px] max-md:hidden;
     }
 
     .card-content {
-      @apply flex flex-col gap-2 justify-center items-center p-7 dark-gradient rounded-2xl min-h-full;
+      @apply flex flex-col gap-2 justify-center items-center p-7 dark-gradient rounded-4xl min-h-full;
     }
   }
 
@@ -262,11 +260,11 @@
   }
 
   .root-layout {
-    @apply flex mx-auto max-w-6xl flex-col gap-12 my-12 px-16 max-sm:px-4 max-sm:my-8;
+    @apply flex mx-auto max-w-7xl flex-col gap-12 my-12 px-16 max-sm:px-4 max-sm:my-8;
   }
 
   .card-cta {
-    @apply flex flex-row blue-gradient-dark rounded-3xl px-16 py-6 items-center justify-between max-sm:px-4;
+    @apply flex flex-row bg-slate-800/20 shadow-md rounded-3xl px-16 py-6 items-center justify-between max-sm:px-4 border-2 border-slate-800;
   }
 
   .interviews-section {
@@ -286,7 +284,7 @@
   }
 
   .card-interview {
-    @apply dark-gradient rounded-2xl min-h-full flex flex-col p-6 relative overflow-hidden gap-10 justify-between;
+    @apply bg-slate-800/20 rounded-2xl min-h-full flex flex-col p-6 relative overflow-hidden gap-10 justify-between;
 
     .badge-text {
       @apply text-sm font-semibold capitalize;
@@ -300,10 +298,6 @@
 
 @utility border-gradient {
   @apply bg-gradient-to-b from-[#4B4D4F] to-[#4B4D4F33];
-}
-
-@utility pattern {
-  @apply bg-[url('/pattern.png')] bg-top bg-no-repeat;
 }
 
 @utility blue-gradient-dark {

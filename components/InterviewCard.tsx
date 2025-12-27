@@ -4,25 +4,29 @@ import Image from "next/image";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import DisplayTechIcons from "./DisplayTechIcons";
+import { getFeedbackByInterviewId } from "@/lib/actions/general.action";
 
-const InterviewCard = ({ interviewId, userId, role, type, techstack,
+const InterviewCard = async ({ id, userId, role, type, techstack,
     createdAt }: InterviewCardProps) => {
-    const feedback = null as Feedback | null;
+    const feedback = userId && id ? await getFeedbackByInterviewId({ interviewId: id, userId })
+        : null;
     const normalizedType = /mix/gi.test(type) ? 'Mixed' : type;
-    const formatedDate = dayjs(feedback?.createdAt || createdAt || Date.now())
+    const formatedDate = dayjs(feedback?.createdAt || createdAt)
         .format('MMM D, YYYY');
 
+    const coverSeed = id ?? "default";
+
     return (
-        <div className="card-border min-h-96 w-90 max-sm:w-full">
+        <div className="card-border min-h-96 w-90 max-sm:w-full shadow-md">
             <div className="card-interview">
                 <div>
                     <div className="absolute top-0 right-0 w-fit px-4 py-2 
-                    rounded-bl-lg bg-light-600">
+                    rounded-bl-lg">
                         <p className="badge-text">
                             {normalizedType}
                         </p>
                     </div>
-                    <Image src={getRandomInterviewCover()} alt="cover image" height={90} width={90}
+                    <Image src={getRandomInterviewCover(coverSeed)} alt="cover image" height={90} width={90}
                         className="rounded-full object-fit size-22" />
                     <h3 className="mt-5 capitalize">
                         {role} Interview
@@ -42,10 +46,10 @@ const InterviewCard = ({ interviewId, userId, role, type, techstack,
                     </p>
                 </div>
                 <div className="flex flex-row justify-between">
-                    <DisplayTechIcons techStack = {techstack} />
+                    <DisplayTechIcons techStack={techstack} />
                     <Button className="btn-primary">
-                        <Link href={feedback ? `/interview/${interviewId}/feedback`
-                            : `/interview/${interviewId}`}>
+                        <Link href={feedback ? `/interview/${id}/feedback`
+                            : `/interview/${id}`}>
                             {feedback ? 'Check Feedback' : 'View Interview'}
                         </Link>
                     </Button>
