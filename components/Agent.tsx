@@ -111,15 +111,20 @@ const Agent = ({
             }
         };
 
-        if (callStatus === CallStatus.FINISHED &&
-            type !== "generate" &&
-            !feedbackGenerated.current) {
-            feedbackGenerated.current = true;
+        if (callStatus === CallStatus.FINISHED) {
+            if (type === "generate") {
+                router.push("/");
+                return;
+            }
+            if (!feedbackGenerated.current) {
+                feedbackGenerated.current = true;
 
-            setTimeout(() => {
-                handleGenerateFeedback(messages);
-            }, 1200);
+                setTimeout(() => {
+                    handleGenerateFeedback(messages);
+                }, 1200);
+            }
         }
+
     }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
 
     const handleCall = async () => {
