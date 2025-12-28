@@ -25,7 +25,6 @@ const authFormSchema = (type: FormType) => {
 const AuthForm = ({ type }: { type: FormType }) => {
   const router = useRouter();
   const formSchema = authFormSchema(type);
-  // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,12 +34,11 @@ const AuthForm = ({ type }: { type: FormType }) => {
     },
   });
 
-  // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       if (type === 'sign-up') {
         const { name, email, password } = values;
-        
+
         const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
 
         const result = await signUp({
@@ -50,7 +48,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
           password,
         })
 
-        if(!result?.success){
+        if (!result?.success) {
           toast.error(result?.message);
           return;
         }
@@ -63,7 +61,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
         const idToken = await userCredentials.user.getIdToken();
 
-        if(!idToken) {
+        if (!idToken) {
           toast.error("Sign in failed")
           return;
         }
