@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -44,18 +45,18 @@ const Agent = ({
         };
 
         const onMessage = (message: Message) => {
-            if (message.type === "transcript") {
-                if (!message.transcript?.trim()) return;
+            if (message.type !== "transcript") return;
+            if (!message.transcript?.trim()) return;
 
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        role: message.role,
-                        content: message.transcript,
-                    },
-                ]);
-            }
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: message.role,
+                    content: message.transcript,
+                },
+            ]);
         };
+
         const onSpeechStart = () => {
             console.log("speech start");
             setIsSpeaking(true);
@@ -86,7 +87,7 @@ const Agent = ({
             vapi.off("error", onError);
         };
     }, []);
-
+    const feedbackGenerated = useRef(false);
     useEffect(() => {
         if (messages.length > 0) {
             setLastMessage(messages[messages.length - 1].content);
@@ -110,14 +111,14 @@ const Agent = ({
             }
         };
 
-        if (callStatus === CallStatus.FINISHED) {
-            if (type === "generate") {
-                router.push("/");
-            } else {
-                setTimeout(() => {
-                    handleGenerateFeedback(messages);
-                }, 1200);
-            }
+        if (callStatus === CallStatus.FINISHED &&
+            type !== "generate" &&
+            !feedbackGenerated.current) {
+            feedbackGenerated.current = true;
+
+            setTimeout(() => {
+                handleGenerateFeedback(messages);
+            }, 1200);
         }
     }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
 
@@ -153,8 +154,8 @@ const Agent = ({
     };
 
     const handleDisconnect = async () => {
-        setCallStatus(CallStatus.FINISHED);
         await vapi.stop();
+        setCallStatus(CallStatus.FINISHED);
     };
 
     return (

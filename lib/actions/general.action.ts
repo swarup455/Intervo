@@ -45,50 +45,84 @@ export async function getInterviewById(id: string): Promise<Interview | null> {
 }
 
 export async function createFeedback(params: CreateFeedbackParams) {
-    const { interviewId, userId, transcript } = params;
+    const { interviewId, userId, transcript, feedbackId } = params;
 
     try {
-        const formattedTranscript = transcript
-            .map((sentence: { role: string; content: string }) => (
-                `- ${sentence.role}: ${sentence.content}\n`
-            )).join('');
+        if (!transcript || transcript.length < 2) {
+            throw new Error("Transcript too short to generate feedback");
+        }
 
-        const { object: { totalScore, categoryScores, strengths, areasForImprovement, finalAssessment } } = await generateObject<FeedbackResult>({
+        const formattedTranscript = transcript
+            .map(
+                (sentence: { role: string; content: string }) =>
+                    `- ${sentence.role}: ${sentence.content}`
+            )
+            .join("\n");
+
+        const { object } = await generateObject<FeedbackResult>({
             model: groq("llama-3.3-70b-versatile"),
             schema: feedbackSchema,
-            prompt: `You are an AI interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis. Don't be lenient with the candidate. If there are mistakes or areas for improvement, point them out.
+            prompt: `
+            You MUST return a JSON object that EXACTLY matches this structure:
+
+            {
+              "totalScore": number,
+              "categoryScores": [
+                { "name": "Communication Skills", "score": number, "comment": string },
+                { "name": "Technical Knowledge", "score": number, "comment": string },
+                { "name": "Problem Solving", "score": number, "comment": string },
+                { "name": "Cultural Fit", "score": number, "comment": string },
+                { "name": "Confidence and Clarity", "score": number, "comment": string }
+              ],
+              "strengths": string[],
+              "areasForImprovement": string[],
+              "finalAssessment": string
+            }
+
+            DO NOT change field names.
+            DO NOT add extra fields.
+            DO NOT nest objects.
+            DO NOT explain outside JSON.
+
             Transcript:
             ${formattedTranscript}
-
-            Please score the candidate from 0 to 100 in the following areas. Do not add categories other than the ones provided:
-            - **Communication Skills**: Clarity, articulation, structured responses.
-            - **Technical Knowledge**: Understanding of key concepts for the role.
-            - **Problem-Solving**: Ability to analyze problems and propose solutions.
-            - **Cultural & Role Fit**: Alignment with company values and job role.
-            - **Confidence & Clarity**: Confidence in responses, engagement, and clarity.
             `,
-            system: 'You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories.'
         });
 
-        const feedback = await db.collection('feedback').add({
-            interviewId: interviewId,
-            userId: userId,
-            totalScore: totalScore,
-            categoryScores: categoryScores,
-            strengths: strengths,
-            areasForImprovement: areasForImprovement,
-            finalAssessment: finalAssessment,
-            createdAt: new Date().toISOString(),
-        });
-
-        return {
-            success: true,
-            feedbackId: feedback.id
+        if (!object) {
+            throw new Error("Groq returned empty feedback object");
         }
-    } catch (error) {
-        console.error('Error saving feedback', error)
 
-        return { success: false }
+        const feedback = {
+            interviewId,
+            userId,
+            totalScore: object.totalScore,
+            categoryScores: object.categoryScores,
+            strengths: object.strengths,
+            areasForImprovement: object.areasForImprovement,
+            finalAssessment: object.finalAssessment,
+            createdAt: new Date().toISOString(),
+        };
+
+        const feedbackRef = feedbackId
+            ? db.collection("feedback").doc(feedbackId)
+            : db.collection("feedback").doc();
+
+        await feedbackRef.set(feedback);
+
+        const interviewRef = db.collection("interviews").doc(interviewId);
+        const snap = await interviewRef.get();
+
+        if (snap.exists) {
+            await interviewRef.update({
+                finalized: true,
+                completedAt: new Date().toISOString(),
+            });
+        }
+        return { success: true, feedbackId: feedbackRef.id };
+    } catch (error) {
+        console.error("Error saving feedback:", error);
+        return { success: false };
     }
 }
 
