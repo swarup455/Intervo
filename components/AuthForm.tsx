@@ -39,6 +39,11 @@ const AuthForm = ({ type }: { type: FormType }) => {
       if (type === 'sign-up') {
         const { name, email, password } = values;
 
+        if (email !== 'swarup82546@gmail.com' && email !== 'swarup75489@gmail.com'){
+          toast.error("Access Denied!!");
+          return;
+        }
+
         const userCredentials = await createUserWithEmailAndPassword(auth, email, password);
 
         const result = await signUp({
