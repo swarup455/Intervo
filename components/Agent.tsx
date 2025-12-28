@@ -3,13 +3,10 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
 import { cn } from "@/lib/utils";
 import { vapi } from "@/lib/vapi.sdk";
 import { interviewer } from "@/constants";
 import { createFeedback } from "@/lib/actions/general.action";
-
-const feedbackGenerated = useRef(false);
 
 enum CallStatus {
     INACTIVE = "INACTIVE",
@@ -113,9 +110,7 @@ const Agent = ({
             }
         };
 
-        if (callStatus === CallStatus.FINISHED && !feedbackGenerated.current) {
-            feedbackGenerated.current = true;
-            
+        if (callStatus === CallStatus.FINISHED) {
             if (type === "generate") {
                 router.push("/");
             } else {
