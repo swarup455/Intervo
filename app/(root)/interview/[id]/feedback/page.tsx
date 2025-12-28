@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { getCurretUser } from "@/lib/actions/auth.actions";
 import { getFeedbackByInterviewId, getInterviewById } from "@/lib/actions/general.action";
 import { redirect } from "next/navigation";
@@ -7,6 +8,7 @@ import dayjs from "dayjs";
 import Link from "next/link";
 
 const page = async ({ params }: RouteParams) => {
+    noStore();
     const { id } = await params;
     const user = await getCurretUser();
 

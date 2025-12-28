@@ -92,11 +92,16 @@ export async function createFeedback(params: CreateFeedbackParams) {
         if (!object) {
             throw new Error("Groq returned empty feedback object");
         }
+        const sumOfScores = object.categoryScores.reduce(
+            (sum, c) => sum + c.score,
+            0
+        );
+        const totalScore = Math.round((sumOfScores / 25) * 100);
 
         const feedback = {
             interviewId,
             userId,
-            totalScore: object.totalScore,
+            totalScore,
             categoryScores: object.categoryScores,
             strengths: object.strengths,
             areasForImprovement: object.areasForImprovement,
@@ -131,7 +136,7 @@ export async function getFeedbackByInterviewId(params: GetFeedbackByInterviewIdP
 
     const feedback = await db.collection('feedback')
         .where('interviewId', '==', interviewId)
-        .where('userId', '!=', userId)
+        .where('userId', '==', userId)
         .limit(1)
         .get();
 
