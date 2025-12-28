@@ -98,191 +98,78 @@ export const mappings = {
 };
 
 export const generator: CreateWorkflowDTO = {
-  name: "Generate Interview",
+  name: "interview_prep_v2",
   nodes: [
     {
-      name: "start",
+      name: "introduction",
       type: "conversation",
       isStart: true,
       metadata: {
-        position: {
-          x: 0,
-          y: 0,
-        },
+        position: { x: -400, y: -100 },
       },
       prompt:
-        "Speak first. Greet the user and help them create a new AI Interviewer",
+        "Greet the user. Tell them you will collect some details to create a personalized interview. Ask the questions one by one and wait for the answer before moving on.",
       voice: {
-        model: "aura-2",
-        voiceId: "thalia",
-        provider: "deepgram",
+        provider: "vapi",
+        voiceId: "Lily",
       },
       variableExtractionPlan: {
-        output: [
-          {
-            title: "level",
-            description: "The job experience level.",
-            type: "string",
-            enum: ["entry", "mid", "senior"],
+        schema: {
+          type: "object",
+          properties: {
+            role: {
+              type: "string",
+              description: "Job role (Frontend / Backend / Fullstack)",
+            },
+            level: {
+              type: "string",
+              description: "Experience level (Fresher / Junior / Senior)",
+            },
+            techstack: {
+              type: "string",
+              description: "Technologies (React, Next.js, Node, etc.)",
+            },
+            amount: {
+              type: "number",
+              description: "Number of interview questions",
+            },
+            type: {
+              type: "string",
+              description: "Interview type (Mock / Technical / Behavioral)",
+            },
           },
-          {
-            title: "amount",
-            description: "How many questions would you like to generate?",
-            type: "number",
-            enum: [],
-          },
-          {
-            title: "techstack",
-            description:
-              "A list of technologies to cover during the job interview. For example, React, Next.js, Express.js, Node and so on...",
-            type: "string",
-            enum: [],
-          },
-          {
-            title: "role",
-            description:
-              "What role should would you like to train for? For example Frontend, Backend, Fullstack, Design, UX?",
-            type: "string",
-            enum: [],
-          },
-          {
-            title: "type",
-            description: "What type of the interview should it be? ",
-            type: "string",
-            enum: ["behavioural", "technical", "mixed"],
-          },
-        ],
+        },
       },
     },
     {
-      name: "apiRequest_1747470739045",
+      name: "generateInterview",
       type: "tool",
+      toolId: "dbf489b6-1a59-484a-a6a4-c28c11f8df7d",
       metadata: {
-        position: {
-          x: -16.075937072883846,
-          y: 703.623428447121,
-        },
-      },
-      method: "POST",
-      url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/assistent/generate`,
-      headers: {
-        type: "object",
-        properties: {},
-      },
-      body: {
-        type: "object",
-        properties: {
-          role: {
-            type: "string",
-            description: "",
-            value: "{{ role }}",
-          },
-          level: {
-            type: "string",
-            description: "",
-            value: "{{ level }}",
-          },
-          type: {
-            type: "string",
-            description: "",
-            value: "{{ type }}",
-          },
-          amount: {
-            type: "number",
-            description: "",
-            value: "{{ amount }}",
-          },
-          userid: {
-            type: "string",
-            description: "",
-            value: "{{ userid }}",
-          },
-          techstack: {
-            type: "string",
-            description: "",
-            value: "{{ techstack }}",
-          },
-        },
-      },
-      output: {
-        type: "object",
-        properties: {},
-      },
-      mode: "blocking",
-      hooks: [],
-    },
-    {
-      name: "conversation_1747721261435",
-      type: "conversation",
-      metadata: {
-        position: {
-          x: -17.547788169718615,
-          y: 1003.3409337989506,
-        },
-      },
-      prompt:
-        "Thank the user for the conversation and inform them that the interview was generated successfully.",
-      voice: {
-        provider: "deepgram",
-        voiceId: "thalia",
-        model: "aura-2",
+        position: { x: -410, y: 355 },
       },
     },
     {
-      name: "conversation_1747744490967",
-      type: "conversation",
+      name: "postProcessInterview",
+      type: "tool",
+      toolId: "655377f9-4ef6-4430-bdd0-01a3ae9f9eea",
       metadata: {
-        position: {
-          x: -11.165436030430953,
-          y: 484.94857971060617,
-        },
-      },
-      prompt: "Say that the Interview will be generated shortly.",
-      voice: {
-        provider: "deepgram",
-        voiceId: "thalia",
-        model: "aura-2",
-      },
-    },
-    {
-      name: "hangup_1747744730181",
-      type: "hangup",
-      metadata: {
-        position: {
-          x: 76.01267674000721,
-          y: 1272.0665127156606,
-        },
+        position: { x: -412, y: 628 },
       },
     },
   ],
   edges: [
     {
-      from: "apiRequest_1747470739045",
-      to: "conversation_1747721261435",
+      from: "introduction",
+      to: "generateInterview",
       condition: {
         type: "ai",
-        prompt: "",
+        prompt: "If all required variables are provided",
       },
     },
     {
-      from: "start",
-      to: "conversation_1747744490967",
-      condition: {
-        type: "ai",
-        prompt: "If user provided all the required variables",
-      },
-    },
-    {
-      from: "conversation_1747744490967",
-      to: "apiRequest_1747470739045",
-      condition: {
-        type: "ai",
-        prompt: "",
-      },
-    },
-    {
-      from: "conversation_1747721261435",
-      to: "hangup_1747744730181",
+      from: "generateInterview",
+      to: "postProcessInterview",
       condition: {
         type: "ai",
         prompt: "",
@@ -290,7 +177,6 @@ export const generator: CreateWorkflowDTO = {
     },
   ],
 };
-
 
 export const interviewer: CreateAssistantDTO = {
   name: "Interviewer",
@@ -397,29 +283,4 @@ export const interviewCovers = [
   "/telegram.png",
   "/tiktok.png",
   "/yahoo.png",
-];
-
-export const dummyInterviews: Interview[] = [
-  {
-    id: "1",
-    userId: "user1",
-    role: "Frontend Developer",
-    type: "Technical",
-    techstack: ["React", "TypeScript", "Next.js", "Tailwind CSS"],
-    level: "Junior",
-    questions: ["What is React?"],
-    finalized: false,
-    createdAt: "2024-03-15T10:00:00Z",
-  },
-  {
-    id: "2",
-    userId: "user1",
-    role: "Full Stack Developer",
-    type: "Mixed",
-    techstack: ["Node.js", "Express", "MongoDB", "React"],
-    level: "Senior",
-    questions: ["What is Node.js?"],
-    finalized: false,
-    createdAt: "2024-03-14T15:30:00Z",
-  },
 ];

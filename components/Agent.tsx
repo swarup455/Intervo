@@ -3,11 +3,13 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
+import { useRef } from "react";
 import { cn } from "@/lib/utils";
 import { vapi } from "@/lib/vapi.sdk";
 import { interviewer } from "@/constants";
 import { createFeedback } from "@/lib/actions/general.action";
+
+const feedbackGenerated = useRef(false);
 
 enum CallStatus {
     INACTIVE = "INACTIVE",
@@ -45,12 +47,18 @@ const Agent = ({
         };
 
         const onMessage = (message: Message) => {
-            if (message.type === "transcript" && message.transcriptType === "final") {
-                const newMessage = { role: message.role, content: message.transcript };
-                setMessages((prev) => [...prev, newMessage]);
+            if (message.type === "transcript") {
+                if (!message.transcript?.trim()) return;
+
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        role: message.role,
+                        content: message.transcript,
+                    },
+                ]);
             }
         };
-
         const onSpeechStart = () => {
             console.log("speech start");
             setIsSpeaking(true);
@@ -105,11 +113,15 @@ const Agent = ({
             }
         };
 
-        if (callStatus === CallStatus.FINISHED) {
+        if (callStatus === CallStatus.FINISHED && !feedbackGenerated.current) {
+            feedbackGenerated.current = true;
+            
             if (type === "generate") {
                 router.push("/");
             } else {
-                handleGenerateFeedback(messages);
+                setTimeout(() => {
+                    handleGenerateFeedback(messages);
+                }, 1200);
             }
         }
     }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
