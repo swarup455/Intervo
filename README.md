@@ -2,6 +2,15 @@
 
 Intervo is a production-grade AI mock interview platform designed to provide high-fidelity, real-time voice assessments for technical and behavioral roles. By integrating low-latency voice AI with structured LLM evaluation, it simulates the actual interview experience and provides actionable, data-driven feedback.
 
+**Tech Stack:**
+* **Next.js** (App Router for optimized routing and SSR)
+* **TypeScript** (For strict type safety and developer productivity)
+* **Vapi AI** (Low-latency real-time voice orchestration and WebRTC)
+* **Groq LLM** (Ultra-fast inference for feedback and evaluation)
+* **Firebase** (Authentication and Firestore for real-time data persistence)
+* **Zod** (For strict schema validation of AI outputs)
+* **Tailwind CSS & shadcn/ui** (For a responsive, accessible, and professional UI)
+
 **Live Demo:** [https://intervo-psi.vercel.app](https://intervo-psi.vercel.app)
 
 ---
